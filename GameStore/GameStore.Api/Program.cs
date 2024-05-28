@@ -1,96 +1,25 @@
+using GameStore.Api.Data;
+using GameStore.Api.Endpoints;
+
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 
-using GameStore.Api.Dtos;
+var connString = builder.Configuration.GetConnectionString("GameStore"); // get connstring value from appsettings.json through a depency injection
 
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
+builder.Services.AddSqlite<GameStoreContext>(connString); // add  connectionstring to entityframework
 
-const string GetGameEndPointName = "GetGame";
+// --- don't store credentials (db pw=...) in appsettings.json when in production, 
+//---  instead use Iconfiguration with User Secrets as interface between appsettings and rest api
 
-List<GameDto> games = [
-    new (
-        1,
-        "Street Dancer",
-        "Fun",
-        19.99M,                // add M for a decimal type
-        new DateOnly(1993, 8, 15)),
-    new (
-        2,
-        "Fantasia",
-        "Roleplay",
-        9.99M,
-        new DateOnly(1985, 5, 25)),
-    new (
-        3,
-        "Pong",
-        "Sports",
-        29.99M,
-        new DateOnly(1973, 2, 7))
-];
+// resources: install https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Sqlite/8.0.2 
+//            install https://www.nuget.org/packages/dotnet-ef/8.0.2 (tools for passing EF commands)
+//            install https://www.nuget.org/packages/Microsoft.EntityFrameworkCore.Design/8.0.2 (for building a sqlite database through entityframework with migrations )
 
+WebApplication app = builder.Build();
 
-// GET/games 
-//function to map games list to get games from api
-app.MapGet("games", () => games);
+app.MapGamesEndpoints();
 
-
-// GET games/1
-app.MapGet("games/{id}", (int id) =>
-{
-    // boolean ? if found game id or not
-    GameDto? game = games.Find(game => game.Id == id);
-
-    return game is null ? Results.NotFound() : Results.Ok(game);
-})
-.WithName(GetGameEndPointName);
-
-
-// POST /games
-app.MapPost("games", (CreateGameDto newGame) =>
-{
-    GameDto game = new(
-        games.Count + 1,
-        newGame.Name,
-        newGame.Genre,
-        newGame.Price,
-        newGame.ReleaseDate);
-
-    games.Add(game);
-
-    return Results.CreatedAtRoute(GetGameEndPointName, new { id = game.Id }, game);
-});
-
-// PUT /games   (not safe for concurrent PUT requests in list games)
-app.MapPut("games/{id}", (int id, UpdateGameDto updatedGame) =>
-{
-    var index = games.FindIndex(game => game.Id == id);
-
-    if (index == -1)
-    {
-        return Results.NotFound();
-    }
-
-    games[index] = new GameDto(
-        id,
-        updatedGame.Name,
-        updatedGame.Genre,
-        updatedGame.Price,
-        updatedGame.ReleaseDate
-    );
-
-    return Results.NoContent();
-});
-
-
-// DELETE /games/1
-app.MapDelete("games/{id}", (int id) =>
-{
-    games.RemoveAll(game => game.Id == id);
-
-    return Results.NoContent();
-});
-
-// display text
-//app.MapGet("/", () => "Hello World!");
+// call method to build the db
+app.MigrateDb();
 
 app.Run();

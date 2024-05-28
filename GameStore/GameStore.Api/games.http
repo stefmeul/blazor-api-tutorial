@@ -21,7 +21,7 @@ Content-Type: application/json
 {
     "name": "Street Contemporary Dancer",
     "genre": "Fun",
-    "price": 9.5,
+    "price": 109.5,
     "releaseDate": "2005-10-14"
 }
 
