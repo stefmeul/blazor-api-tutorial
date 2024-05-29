@@ -8,22 +8,22 @@ POST http://localhost:5161/games
 Content-Type: application/json
 
 {
-    "name": "newgame",
-    "genreId": 1,
+    "name": "game",
+    "genreId": 5,
     "price": 22.5,
     "releaseDate": "2005-10-14"
 }
 
 ###
-PUT http://localhost:5161/games/3
+PUT http://localhost:5161/games/1
 Content-Type: application/json
 
 {
     "name": "Contemporary Dancer",
-    "genreId": 1,
+    "genreId": 2,
     "price": 109.5,
     "releaseDate": "2005-10-14"
 }
 
 ###
-DELETE http://localhost:5161/games/4
+DELETE http://localhost:5161/games/2

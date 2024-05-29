@@ -18,8 +18,9 @@ builder.Services.AddSqlite<GameStoreContext>(connString); // add  connectionstri
 WebApplication app = builder.Build();
 
 app.MapGamesEndpoints();
+app.MapGenresEndpoints();
 
-// call method to build the db
-app.MigrateDb();
+// call asynchronous method to build the db
+await app.MigrateDbAsync();
 
 app.Run();
